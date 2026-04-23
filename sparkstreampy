@@ -1,0 +1,52 @@
+mkdir -p ~/spark_input
+nano ~/spark_input/data1.csv
+Paste:
+ProductID,Amount
+101,250.0
+102,348.0
+103,569.0
+104,601.0
+nano sparkstream.py
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import sum
+from pyspark.sql.types import StructType, StructField, IntegerType, DoubleType
+
+# Initialize Spark
+spark = SparkSession.builder \
+    .appName("RetailStoreStreaming") \
+    .getOrCreate()
+
+spark.sparkContext.setLogLevel("ERROR")
+
+# Schema
+schema = StructType([
+    StructField("ProductID", IntegerType(), True),
+    StructField("Amount", DoubleType(), True)
+])
+
+# Input path
+input_path = "/home/vboxuser/spark_input"
+
+# Read stream
+retail_stream_df = spark.readStream \
+    .format("csv") \
+    .option("header", "true") \
+    .schema(schema) \
+    .load(input_path)
+
+# Process
+processed_df = retail_stream_df.groupBy("ProductID") \
+    .agg(sum("Amount").alias("TotalSales"))
+
+# Output
+query = processed_df.writeStream \
+    .outputMode("complete") \
+    .format("console") \
+    .start()
+
+query.awaitTermination()
+spark-submit sparkstream.py
+#Now open another terminal and add new data:
+nano ~/spark_input/data2.csv
+105,700.0
+106,800.0
