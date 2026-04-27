@@ -1,0 +1,54 @@
+# Servo Motor with Relay
+import RPi.GPIO as GPIO
+import time
+
+# Pin configuration
+RELAY_PIN = [31, 33, 35, 37]
+SERVO_PIN = 11
+
+GPIO.setmode(GPIO.BOARD)
+GPIO.setwarnings(False)
+
+GPIO.setup(RELAY_PIN, GPIO.OUT)
+GPIO.setup(SERVO_PIN, GPIO.OUT)
+
+# Setup PWM for servo
+pwm = GPIO.PWM(SERVO_PIN, 50)  # 50Hz frequency
+pwm.start(0)
+
+def set_angle(angle):
+    duty = 2 + (angle / 18)
+    GPIO.output(SERVO_PIN, True)
+    pwm.ChangeDutyCycle(duty)
+    time.sleep(0.5)
+    GPIO.output(SERVO_PIN, False)
+    pwm.ChangeDutyCycle(0)
+
+try:
+    while True:
+        GPIO.output(RELAY_PIN, 1)
+        print("Relay ON")
+        time.sleep(1)
+
+        print("Moving to 0°")
+        set_angle(0)
+        time.sleep(1)
+
+        print("Moving to 90°")
+        set_angle(90)
+        time.sleep(1)
+
+        print("Moving to 180°")
+        set_angle(180)
+        time.sleep(1)
+
+        print("Relay OFF")
+        GPIO.output(RELAY_PIN, 0)
+        time.sleep(3)
+
+except KeyboardInterrupt:
+    print("Program stopped")
+
+finally:
+    pwm.stop()
+    GPIO.cleanup()
