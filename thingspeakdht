@@ -1,0 +1,38 @@
+%save file as humidity_matlab.m
+% ThingSpeak Channel Details
+channelID = 3351574;
+readAPIKey = "4C0LEWOYZB8W7WV";   % replace with your actual key if needed
+
+% Field number (Humidity stored in field 1)
+humidityField = 1;
+
+% Read last 60 minutes of data
+humidity = thingSpeakRead(channelID, ...
+    'Fields', humidityField, ...
+    'NumMinutes', 60, ...
+    'ReadKey', readAPIKey);
+
+% Display raw data
+disp("Humidity values:");
+disp(humidity);
+
+% Remove NaN values (missing data)
+humidityClean = humidity(~isnan(humidity));
+
+% Display cleaned data
+disp("Cleaned humidity values:");
+disp(humidityClean);
+
+% Calculate average humidity
+avgHumidity = mean(humidityClean);
+
+% Display result
+fprintf("Average Humidity (last 60 min) = %.2f\n", avgHumidity);
+
+% Optional: Plot data
+figure;
+plot(humidity, '-o');
+title("Humidity Data from ThingSpeak");
+xlabel("Sample Number");
+ylabel("Humidity");
+grid on;
