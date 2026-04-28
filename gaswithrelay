@@ -1,0 +1,37 @@
+import RPi.GPIO as GPIO
+import time
+
+# GPIO Mode
+GPIO.setmode(GPIO.BOARD)
+GPIO.setwarnings(False)
+
+# Pin configuration
+GAS_PIN = 35     # Gas sensor input
+RELAY_PIN = 37   # Relay output (change if needed)
+
+# Setup
+GPIO.setup(GAS_PIN, GPIO.IN)
+GPIO.setup(RELAY_PIN, GPIO.OUT)
+
+# Initial state (Relay OFF)
+GPIO.output(RELAY_PIN, GPIO.HIGH)
+
+print("Gas Detection with Relay Started...")
+
+try:
+    while True:
+        gas_value = GPIO.input(GAS_PIN)
+
+        if gas_value == 0:   # Gas detected
+            print("⚠️ Gas Leak Detected!")
+            GPIO.output(RELAY_PIN, GPIO.LOW)   # Turn ON relay
+
+        else:
+            print("✅ No Gas")
+            GPIO.output(RELAY_PIN, GPIO.HIGH)  # Turn OFF relay
+
+        time.sleep(1)
+
+except KeyboardInterrupt:
+    print("Program Stopped")
+    GPIO.cleanup()
