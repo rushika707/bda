@@ -1,0 +1,19 @@
+import RPi.GPIO as g
+import time
+
+channel = 16   # Change based on your connection
+
+g.setmode(g.BOARD)
+g.setup(channel, g.IN)
+
+try:
+    while True:
+        if g.input(channel) == 0:
+            print("Moisture detected")
+        else:
+            print("Moisture not detected")
+
+        time.sleep(2)
+
+except KeyboardInterrupt:
+    g.cleanup()
