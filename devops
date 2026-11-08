@@ -1,0 +1,380 @@
+# STEP 1: Install Required Software
+# Install Docker Desktop manually from:
+# https://www.docker.com/products/docker-desktop/
+# Start Docker Desktop before continuing.
+
+winget install -e --id Kubernetes.kubectl
+winget install -e --id Kubernetes.minikube
+
+# Restart PowerShell after installation.
+
+# STEP 2: Verify Installation
+docker --version
+kubectl version --client
+minikube version
+
+# STEP 3: Start Kubernetes Cluster
+minikube start --driver=docker
+kubectl get nodes
+
+# STEP 4: Create Project Folder
+mkdir kubernetes-demo
+cd kubernetes-demo
+
+# STEP 5: Create Simple Flask Application
+@'
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route("/")
+def home():
+    return "Hello from Kubernetes!"
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
+'@ | Set-Content app.py
+
+# STEP 6: Create Requirements File
+"flask" | Set-Content requirements.txt
+
+# STEP 7: Create Dockerfile
+@'
+FROM python:3.9-slim
+WORKDIR /app
+COPY . /app
+RUN pip install -r requirements.txt
+EXPOSE 5000
+CMD ["python", "app.py"]
+'@ | Set-Content Dockerfile
+
+# STEP 8: Build Docker Image
+minikube image build -t flask-k8s-app .
+
+# STEP 9: Create Kubernetes Deployment
+@'
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flask-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: flask-app
+  template:
+    metadata:
+      labels:
+        app: flask-app
+    spec:
+      containers:
+      - name: flask-container
+        image: flask-k8s-app
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5000
+'@ | Set-Content deployment.yaml
+
+# STEP 10: Create Kubernetes Service
+@'
+apiVersion: v1
+kind: Service
+metadata:
+  name: flask-service
+spec:
+  type: NodePort
+  selector:
+    app: flask-app
+  ports:
+  - port: 5000
+    targetPort: 5000
+    nodePort: 30007
+'@ | Set-Content service.yaml
+
+# STEP 11: Deploy Application
+kubectl apply -f deployment.yaml
+kubectl apply -f service.yaml
+
+# STEP 12: Check Cluster Status
+kubectl get nodes
+kubectl get pods
+kubectl get deployments
+kubectl get services
+
+# STEP 13: Wait for Deployment
+kubectl rollout status deployment/flask-deployment
+
+# STEP 14: Open Application in Browser
+minikube service flask-service
+
+# EXPECTED OUTPUT:
+# Hello from Kubernetes!
+
+# STEP 15: View Application Logs
+kubectl logs deployment/flask-deployment
+
+# STEP 16: Delete Deployment and Service
+# Run these commands after completing the demo:
+# kubectl delete -f service.yaml
+# kubectl delete -f deployment.yaml
+
+# STEP 17: Stop Kubernetes Cluster
+# minikube stop
+
+
+  # 1. Install Puppet Agent
+choco install puppet-agent -y
+$env:Path += ";C:\Program Files\Puppet Labs\Puppet\bin"
+puppet --version
+
+# 2. Create Puppet directory
+New-Item -Path "C:\puppet" -ItemType Directory -Force
+
+# 3. Create Puppet manifest
+@'
+class install_git {
+  package { 'git':
+    ensure   => installed,
+    provider => chocolatey,
+  }
+}
+include install_git
+'@ | Set-Content -Path "C:\puppet\site.pp" -Encoding ASCII
+
+# 4. Install Chocolatey module
+puppet module install puppetlabs-chocolatey
+
+# 5. Apply Puppet configuration
+puppet apply C:\puppet\site.pp
+
+# 6. Verify Git installation
+git --version
+
+
+  
+Experiment 5 — Docker: Architecture, Container Life Cycle and Docker Commands
+
+Step 1 — Install Docker Desktop
+Download Docker Desktop for Windows and complete the installation.
+
+Step 2 — Check Docker context
+docker context ls
+
+Step 3 — Select Docker Desktop context
+docker context use desktop-linux
+
+Step 4 — Check running containers
+docker ps
+
+Step 5 — Check Docker version
+docker --version
+
+Step 6 — Display Docker information
+docker info
+
+Step 7 — Download Nginx image
+docker pull nginx
+
+Step 8 — List Docker images
+docker images
+
+Step 9 — Remove Nginx image
+docker rmi nginx
+
+Step 10 — Download Nginx image again
+docker pull nginx
+
+Step 11 — Run Hello World container
+docker run hello-world
+
+Step 12 — Run Alpine container interactively
+docker run -it alpine sh
+
+Step 13 — Display kernel information
+uname -a
+
+Step 14 — Display Alpine information
+cat /etc/os-release
+
+Step 15 — Check working directory
+pwd
+
+Step 16 — List files
+ls -l
+
+Step 17 — Exit the container
+exit
+
+Step 18 — Display command history
+Get-History
+
+
+
+Experiment 3 — Git: Install, Configure and Execute Git Operations
+
+Step 1 — Update the system
+sudo apt update
+
+Step 2 — Install Git
+sudo apt install git -y
+git --version
+
+Step 3 — Configure Git
+git config --global user.name "Your Name"
+git config --global user.email "your@email.com"
+git config --list
+
+Step 4 — Create a working directory
+mkdir GitDemo
+cd GitDemo
+
+Step 5 — Initialize a Git repository
+git init
+
+Step 6 — Create a file
+touch file1.txt
+cat file1.txt
+
+Step 7 — Check repository status
+git status
+
+Step 8 — Add the file to the staging area
+git add file1.txt
+
+Step 9 — Commit the change
+git commit -m "First Commit"
+
+Step 10 — Create a GitHub repository
+Open GitHub → Login/Create account → New Repository → Enter repository name → Create repository
+
+Step 11 — Connect local repository to GitHub
+git remote add origin https://github.com/USERNAME/GitDemo.git
+git remote -v
+
+Step 12 — Rename the default branch
+git branch -M main
+
+Step 13 — Push the repository to GitHub
+git push -u origin main
+
+
+# STEP 1: Install Java
+winget install EclipseAdoptium.Temurin.21.JDK
+
+# STEP 2: Verify Java
+java -version
+
+# STEP 3: Start Jenkins Service
+Start-Service Jenkins
+
+# STEP 4: Check Jenkins Status
+Get-Service Jenkins
+
+# STEP 5: Open Jenkins Dashboard
+Start-Process "http://localhost:8080"
+
+# STEP 6: Get Initial Admin Password
+Get-Content "C:\ProgramData\Jenkins\.jenkins\secrets\initialAdminPassword"
+
+# STEP 7: Open Jenkins Dashboard
+# Complete setup and install suggested plugins.
+# Create admin account.
+
+# STEP 8: Create Freestyle Project
+# Dashboard -> New Item -> MyFirstJob
+# Select Freestyle Project -> OK
+
+# STEP 9: Add Build Step
+# Select Build Steps -> Execute Windows batch command
+# Enter the following commands:
+
+echo Starting Jenkins Build
+echo Hello from Jenkins
+echo Continuous Integration
+echo Building Application
+echo Testing Application
+echo Build Completed Successfully
+
+# STEP 10: Save and Click Build Now
+# Open Build History -> Console Output
+
+# STEP 11: Expected Output
+# Finished: SUCCESS
+
+
+
+  
+# STEP 1: Start Jenkins Controller
+Start-Service Jenkins
+
+# STEP 2: Open Jenkins Dashboard
+Start-Process "http://localhost:8080"
+
+# STEP 3: Create Agent Directory
+New-Item -ItemType Directory -Force -Path "C:\JenkinsAgent"
+
+# STEP 4: Verify Java
+java -version
+
+# STEP 5: Configure Agent in Jenkins Dashboard
+# Manage Jenkins -> Nodes -> New Node
+# Node Name: Slave1
+# Select: Permanent Agent
+# Remote Root Directory: C:\JenkinsAgent
+# Number of Executors: 2
+# Launch Method: Launch agent by connecting it to the controller
+# Click Save
+
+# STEP 6: Download agent.jar
+Invoke-WebRequest `
+  -Uri "http://CONTROLLER_IP:8080/jnlpJars/agent.jar" `
+  -OutFile "C:\JenkinsAgent\agent.jar"
+
+# STEP 7: Connect Agent
+# Copy the actual secret from the Slave1 node page.
+cd C:\JenkinsAgent
+
+java -jar agent.jar `
+  -url http://CONTROLLER_IP:8080/ `
+  -secret YOUR_AGENT_SECRET `
+  -name Slave1 `
+  -workDir "C:\JenkinsAgent"
+
+# STEP 8: Verify Agent
+# Jenkins Dashboard -> Manage Jenkins -> Nodes
+# Check Slave1 status: Online
+
+# STEP 9: Create Freestyle Project
+# Dashboard -> New Item -> SlaveJob
+# Select Freestyle Project -> OK
+
+# STEP 10: Restrict Build to Agent
+# Select Restrict where this project can be run
+# Enter: Slave1
+
+# STEP 11: Add Build Step
+# Select Execute Windows batch command
+
+echo Jenkins Controller Agent Architecture
+echo Executing Build on Agent
+hostname
+echo Building Application
+echo Testing Application
+echo Build Completed Successfully
+
+# STEP 12: Save and Click Build Now
+# Open Console Output
+# Expected: Finished: SUCCESS
+
+# STEP 13: Stop Agent
+# Press Ctrl+C in agent terminal
+
+# STEP 14: Stop Jenkins Controller
+Stop-Service Jenkins
+
+# STEP 15: Start Jenkins Controller
+Start-Service Jenkins
+
+# STEP 16: Verify Jenkins
+Get-Service Jenkins
+
