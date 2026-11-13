@@ -42,99 +42,152 @@ For MATLAB programs:
 
 
 
-# **Experiment 1: Introduction to Network Simulator**
+# **Experiment 1: Introduction to Network Simulator-2 (NS2)**
 
 ### **Aim**
 
-To study the Network Simulator (NS2) and understand its basic features.
+To study Network Simulator-2 (NS2), its features, architecture and applications in computer networks.
 
-### **Simple code**
+### **Introduction**
+
+**Network Simulator-2 (NS2)** is an open-source, discrete-event simulator designed for research in computer networks and communication networks.
+
+It provides support for simulating wired and wireless network protocols.
+
+It supports:
+
+1. TCP and UDP protocols.
+2. Multicast protocols.
+3. Routing protocols.
+4. Wired and wireless networks.
+
+### **Software Used**
+
+1. NS-2 (Network Simulator Version 2)
+2. MATLAB
+3. NetSim
+
+### **Features of NS2**
+
+1. Primarily Unix/Linux based.
+2. Discrete-event simulator for networking research.
+3. Simulates wired and wireless networks.
+4. Supports TCP, FTP, UDP and routing protocols.
+5. Uses TCL as a scripting language.
+6. Simulation files are saved with `.tcl` extension.
+7. Uses C++, OTcl and TclCL.
+
+
+
+**Components:**
+
+- **C++:** Implements the core simulation functions.
+- **OTcl:** Provides an object-oriented scripting interface.
+- **TclCL:** Connects OTcl and C++.
+- **NAM:** Network Animator used to visualize simulations.
+
+### **Explanation**
+
+NS2 works using a TCL script.
+
+1. The user writes a TCL script.
+2. NS2 executes the script.
+3. Network nodes and links are created.
+4. Data packets are transmitted.
+5. Trace files store simulation information.
+6. NAM displays the network animation.
+
+### **Procedure: How to run NS2**
+
+**Step 1:** Open Ubuntu terminal.
+
+**Step 2:** Check NS2 installation.
 
 ```
+ns
+```
+
+**Step 3:** Check NAM installation.
+
+```
+nam
+```
+
+**Step 4:** Check MATLAB (if installed).
+
+```
+matlab
+```
+
+**Step 5:** Check NS2 version.
+
+```
+ns
+```
+
+Type `exit` to close the NS2 prompt.
+
+### **Expected Output**
+
+```
+NS2 Network Simulator
+
+NS2 is installed successfully.
+
+NAM is available for network visualization.
+
+MATLAB is available for simulation.
+```
+
+
+### **Result**
+
+Thus, we have studied Network Simulator-2, its features, architecture, components and applications in computer networks.
+
+**Important:** Experiment 1 is an introductory theory experiment, so it does not require a separate MATLAB or NS2 simulation program. Experiment 2 onwards involves practical network implementation. Also, remember the correct file extension is `.tcl`, not `.tel`.
+
+
+
+
+# **Experiment 2: Implementation of Simple Two-Node Network**
+
+### **Aim**
+
+To establish and simulate a network connection between two nodes using Network Simulator-2 (NS2).
+
+### ****
+
+Save the file as `exp2.tcl`.
+
+```
+
 set ns [new Simulator]
+
+$ns color 1 Blue
+$ns color 2 Red
 
 set nf [open out.nam w]
 $ns namtrace-all $nf
 
-set n0 [$ns node]
-set n1 [$ns node]
-
-$ns duplex-link $n0 $n1 1Mb 10ms DropTail
-
-set udp [new Agent/UDP]
-$ns attach-agent $n0 $udp
-
-set null [new Agent/Null]
-$ns attach-agent $n1 $null
-
-$ns connect $udp $null
-
-set cbr [new Application/Traffic/CBR]
-$cbr attach-agent $udp
-
-$ns at 1.0 "$cbr start"
-$ns at 4.0 "$cbr stop"
+set tf [open out.tr w]
+$ns trace-all $tf
 
 proc finish {} {
-    global ns nf
+    global ns nf tf
     $ns flush-trace
     close $nf
+    close $tf
     exec nam out.nam &
     exit 0
 }
 
-$ns at 5.0 "finish"
-$ns run
-```
-
-### **Explanation**
-
-- `Simulator`: Creates a new network simulator.
-- `node`: Creates network devices.
-- `duplex-link`: Connects two nodes.
-- `UDP`: Provides transport communication.
-- `CBR`: Generates constant bit-rate traffic.
-- `namtrace-all`: Records network activity.
-- `nam`: Displays the network animation.
-
-### **Procedure**
-
-1. Open Ubuntu terminal.
-2. Create `exp1.tcl`.
-3. Enter the code.
-4. Save the file.
-5. Execute `ns exp1.tcl`.
-6. Observe the network animation.
-
-### **Expected output**
-
-
-- Two nodes are created.
-- A link is established.
-- Packets travel from node 0 to node 1.
-- NAM displays packet transmission.
-
-
-
-
-# **Experiment 2: Implementation of 2-Node Network**
-
-### **Aim**
-
-To implement and simulate a two-node network using NS2.
-
-### **Code**
-
-```
-set ns [new Simulator]
-
-set nf [open exp2.nam w]
-$ns namtrace-all $nf
-
 set n0 [$ns node]
 set n1 [$ns node]
 
-$ns duplex-link $n0 $n1 1Mb 10ms DropTail
+$n0 color red
+$n1 color pink
+
+$ns duplex-link $n0 $n1 2Mb 10ms DropTail
 
 set udp [new Agent/UDP]
 $ns attach-agent $n0 $udp
@@ -144,63 +197,122 @@ $ns attach-agent $n1 $null
 
 $ns connect $udp $null
 
+$udp set fid_ 2
+
 set cbr [new Application/Traffic/CBR]
-$cbr set packetSize_ 500
-$cbr set interval_ 0.1
 $cbr attach-agent $udp
 
-$ns at 1.0 "$cbr start"
-$ns at 4.0 "$cbr stop"
+$cbr set packetSize_ 500
+$cbr set interval_ 0.01
 
-proc finish {} {
-    global ns nf
-    $ns flush-trace
-    close $nf
-    exec nam exp2.nam &
-    exit 0
-}
-
+$ns at 0.1 "$cbr start"
+$ns at 0.5 "$cbr stop"
 $ns at 5.0 "finish"
+
 $ns run
+
 ```
 
 ### **Explanation**
 
-- Two nodes are created: sender and receiver.
-- A 1 Mbps link connects them.
-- UDP is used for sending packets.
-- CBR generates packets every 0.1 seconds.
-- NAM shows the packet movement.
+| Statement         | Meaning                             |
+| ----------------- | ----------------------------------- |
+| `new Simulator`   | Creates NS2 simulator               |
+| `node`            | Creates network nodes               |
+| `duplex-link`     | Connects two nodes                  |
+| `2Mb`             | Link bandwidth                      |
+| `10ms`            | Link delay                          |
+| `DropTail`        | Queue management technique          |
+| `Agent/UDP`       | Creates UDP sender                  |
+| `Agent/Null`      | Receives and discards packets       |
+| `CBR`             | Generates constant bit-rate traffic |
+| `packetSize_ 500` | Packet size is 500 bytes            |
+| `interval_ 0.01`  | Packet generation interval          |
+| `namtrace-all`    | Records NAM animation               |
+| `trace-all`       | Records network events              |
 
 ### **Procedure**
 
-1. Create `exp2.tcl`.
-2. Paste the code.
-3. Save the file.
-4. Run `ns exp2.tcl`.
-5. Observe the two-node network in NAM.
+**Step 1:** Open Ubuntu terminal.
 
-### **Expected output**
+**Step 2:** Create a Tcl file.
 
-[Network Simulator 2: a Simulation Tool for Linux | Linux Journal](https://images.openai.com/static-rsc-4/TGcdoZLNIz1RrvY68qBVqXJ17T4d5bawwVyP44VscGik3Kel3jb_Y-PGwFxWUHgUP7_PPiJsvVhQf4yP2KRzt8fssuZsYg6XbxUScL2qBJvudcQn8vq4VXbJQSz5WdW5IY7FwjXzEop8jkS_aHPbdh7bHomccfVjk0A6Lyv5CY0?purpose=inline)
+```
+nano exp2.tcl
+```
 
-[linuxjournal.com](https://www.linuxjournal.com/article/5929?utm_source=chatgpt.com)
+**Step 3:** Paste the above code.
 
-Two nodes connected by a duplex link with packets travelling between them.
+**Step 4:** Save the file.
 
-# **Experiment 3: Implementation of Different Network Topologies**
+Press `Ctrl + O`, Enter, then `Ctrl + X`.
+
+**Step 5:** Execute the program.
+
+```
+ns exp2.tcl
+```
+
+**Step 6:** Observe the NAM window showing two connected nodes and packet transmission.
+
+### **Expected Output**
+
+
+
+The simulation displays:
+
+- Node 0 and Node 1.
+- A duplex link between the nodes.
+- Packets travelling from Node 0 to Node 1.
+- Network animation in NAM.
+
+### **Result**
+
+Thus, we have successfully established and simulated a simple two-node network using Network Simulator-2.
+
+Important for external
+
+Remember these five points:
+
+1. Number of nodes = 2.
+2. Protocol used = UDP.
+3. Traffic type = CBR.
+4. Bandwidth = 2 Mbps.
+5. Link delay = 10 ms.
+
+
+
+
+
+
+# **Experiment 3 – Implementation of Different Network Topologies**
+
+## **A. Bus Topology**
 
 ### **Aim**
 
-To implement and simulate different network topologies using NS2.
+To implement and simulate Bus Topology using Network Simulator-2.
 
-### **Code – Star topology**
+### **Simple code**
 
 ```
+
 set ns [new Simulator]
 
-set nf [open exp3.nam w]
+set nf [open bus.nam w]
 $ns namtrace-all $nf
+
+set tf [open bus.tr w]
+$ns trace-all $tf
+
+proc finish {} {
+    global ns nf tf
+    $ns flush-trace
+    close $nf
+    close $tf
+    exec nam bus.nam &
+    exit 0
+}
 
 set n0 [$ns node]
 set n1 [$ns node]
@@ -209,81 +321,418 @@ set n3 [$ns node]
 set n4 [$ns node]
 
 $ns duplex-link $n0 $n1 1Mb 10ms DropTail
-$ns duplex-link $n0 $n2 1Mb 10ms DropTail
-$ns duplex-link $n0 $n3 1Mb 10ms DropTail
-$ns duplex-link $n0 $n4 1Mb 10ms DropTail
+$ns duplex-link $n1 $n2 1Mb 10ms DropTail
+$ns duplex-link $n2 $n3 1Mb 10ms DropTail
+$ns duplex-link $n3 $n4 1Mb 10ms DropTail
 
-set udp [new Agent/UDP]
-$ns attach-agent $n1 $udp
+set tcp [new Agent/TCP]
+$ns attach-agent $n0 $tcp
 
-set null [new Agent/Null]
-$ns attach-agent $n3 $null
+set sink [new Agent/TCPSink]
+$ns attach-agent $n4 $sink
 
-$ns connect $udp $null
+$ns connect $tcp $sink
 
-set cbr [new Application/Traffic/CBR]
-$cbr attach-agent $udp
+set ftp [new Application/FTP]
+$ftp attach-agent $tcp
 
-$ns at 1.0 "$cbr start"
-$ns at 4.0 "$cbr stop"
-
-proc finish {} {
-    global ns nf
-    $ns flush-trace
-    close $nf
-    exec nam exp3.nam &
-    exit 0
-}
-
+$ns at 0.5 "$ftp start"
+$ns at 4.0 "$ftp stop"
 $ns at 5.0 "finish"
+
 $ns run
+
 ```
 
 ### **Explanation**
 
-A star topology contains one central node connected to all other nodes.
-
-- Node 0 is the central node.
-- Nodes 1, 2, 3 and 4 are connected to node 0.
-- Data travels through the central node.
-
-### **Other topologies**
-
-[Network Topologies (Bus, Star, Ring) Revision Notes — OCR GCSE | MasteryMind](https://images.openai.com/static-rsc-4/fzsGDasWVw4JeZBdVmH7g_az2UV8p-BydKzy4rsBwhMaTBnNDvdknZNe5inMp4yZecAPuQIw_oAz7gHiZ0xpzqHZalPP6mDxYdV3jimZ8rJPciZEIKrIOuCwzCOgRcndXoy-ezoQdmVDDk6WnT6GbRmJapMPCRXWpYnNMzYQZuI?purpose=inline)
-
-**Bus topology**
-
-All nodes share one communication link.
-
-[Network Topologies](https://images.openai.com/static-rsc-4/edQaJUQ60m2SBf9smMGB7xHygcnIZLoZguIlB7AzwJxzIht8BfnR-yFNSzxrBleQnW37OVDhcbl4WKEpPk5Gx-9IsLf7IQ5pJjzCx3qvlTYT7OUa7gj13-t0MsEQsF-yYT7-pShDjFq2Gnu2gFSJ-eDnEekjtWT4Xo6GdZEh6_I?purpose=inline)
-
-**Star topology**
-
-All nodes connect to a central node.
-
-[What is a Network Topology? (Explained Like You’re Five… But Cooler) – Codango® / Codango.Com](https://images.openai.com/static-rsc-4/2FTCebDB9h5iOIUNC-jRakA85cyUAR4L6cGAuCXZVlWuwm3gZJxkrkzABZaXlBC6osXFkeRtdHNzvqX90SHlIwCTY37f_JfHyMlqUEAZ4CaeCDPuoRtnFJBqv1zKePj0Rn0ScSFUpOJmI0rm4vEifTPNIGHJ6a4IwjSKEEendEY?purpose=inline)
-
-**Ring topology**
-
-Nodes form a closed loop.
-
-[computer networks foundations. Wed, 1st may | by Dheeraj Mourya | Medium](https://images.openai.com/static-rsc-4/gr3rbaN4DCJ-aozusqvaIStPQLv1XGOsHrdkg3_DLtkoGnp18iYxOVPI-efBnOtylaGSABEzdKAUwbiMl0_MHReCdl072fRYTfbzko_1oPczOyhz76a3VovKe6KuSvJQKr2U_M-i4vMsc0jyxdgaeyjRM7G7ROSyyHbGb-oAolE?purpose=inline)
-
-**Mesh topology**
-
-Nodes have multiple interconnections.
+- Bus topology connects nodes in a linear arrangement.
+- Five nodes are created.
+- TCP is used for communication.
+- FTP generates data traffic.
+- Packets travel from the first node to the last node.
 
 ### **Procedure**
 
 1. Open Ubuntu terminal.
-2. Create `exp3.tcl`.
-3. Enter the star topology code.
-4. Save and execute it.
-5. Observe the network in NAM.
+2. Create `bus.tcl`.
+3. Paste the code.
+4. Save the file.
+5. Execute:
+
+```
+ns bus.tcl
+```
 
 ### **Expected output**
 
-A star topology with five nodes is displayed, and packets travel between the connected nodes.
+[network programming - How to set position and orientation of nodes displayed in NAM using TCL code? - Stack Overflow](https://images.openai.com/static-rsc-4/sW0xaWscEN7u70XrC-BldFbXGHTRzokXZ38lMYJl4B2kti1kX1cc_7JCIGpt_FthmWdsIXFzhUPfaJNbSbO-_V2dVxkUoMK0CQeU4qQpqdzaup7WCJDPlWiXBYFp0av8p0InXwmCyN4rXSrX4O2h2XXYTRsLV3oitV9FzESoGCM?purpose=inline)
+
+[stackoverflow.com](https://stackoverflow.com/questions/43412935/how-to-set-position-and-orientation-of-nodes-displayed-in-nam-using-tcl-code?utm_source=chatgpt.com)
+
+Five nodes connected in a linear arrangement with data transmission.
+
+### **Result**
+
+Thus, we have implemented Bus Topology and observed data transmission between nodes.
+
+## **B. Ring Topology**
+
+### **Aim**
+
+To implement and simulate Ring Topology using NS2.
+
+### **Simple code**
+
+```
+
+set ns [new Simulator]
+
+set nf [open ring.nam w]
+$ns namtrace-all $nf
+
+set tf [open ring.tr w]
+$ns trace-all $tf
+
+$ns color 1 Chocolate
+
+proc finish {} {
+    global ns nf tf
+    $ns flush-trace
+    close $nf
+    close $tf
+    exec nam ring.nam &
+    exit 0
+}
+
+set n0 [$ns node]
+set n1 [$ns node]
+set n2 [$ns node]
+set n3 [$ns node]
+set n4 [$ns node]
+set n5 [$ns node]
+
+$ns duplex-link $n0 $n1 1Mb 10ms DropTail
+$ns duplex-link $n1 $n2 1Mb 10ms DropTail
+$ns duplex-link $n2 $n3 1Mb 10ms DropTail
+$ns duplex-link $n3 $n4 1Mb 10ms DropTail
+$ns duplex-link $n4 $n5 1Mb 10ms DropTail
+$ns duplex-link $n5 $n0 1Mb 10ms DropTail
+
+set tcp [new Agent/TCP]
+$tcp set class_ 1
+$ns attach-agent $n1 $tcp
+
+set sink [new Agent/TCPSink]
+$ns attach-agent $n3 $sink
+
+$ns connect $tcp $sink
+
+set cbr [new Application/Traffic/CBR]
+$cbr set packetSize_ 500
+$cbr set interval_ 0.01
+$cbr attach-agent $tcp
+
+$ns at 0.5 "$cbr start"
+$ns at 4.5 "$cbr stop"
+$ns at 5.0 "finish"
+
+$ns run
+
+```
+
+### **Explanation**
+
+- Ring topology connects nodes in a circular arrangement.
+- Six nodes are created.
+- The last node is connected to the first node.
+- TCP is used for transmission.
+- CBR generates network traffic.
+
+### **Procedure**
+
+1. Create `ring.tcl`.
+2. Paste the code.
+3. Save it.
+4. Run:
+
+```
+ns ring.tcl
+```
+
+5\. Observe the ring network in NAM.
+
+### **Expected output**
+
+[Marc Greis' Tutorial for the UCB/LBNL/VINT Network Simulator "ns"](https://images.openai.com/static-rsc-4/Z_FEUidZ3EQ-VsThW90aCgI2au8r_ITUHvWi2QzP2pSCxfeya98mb6v2xn6PeWL1Fjh9bgNsVoNknSIOO8XT4tkZXOjNI5jYL2yCOJ0BjoL48xxLmQinUE8amidtpA0XbEflmL75grpGOeWVwi8s2Md0MV7oRqX49eoueW7bdXQ?purpose=inline)
+
+[isi.edu](https://www.isi.edu/websites/nsnam/ns/tutorial/nsscript3.html?utm_source=chatgpt.com)
+
+Six nodes connected in a circular arrangement.
+
+### **Result**
+
+Thus, we have implemented Ring Topology and observed packet transmission.
+
+## **C. Star Topology**
+
+### **Aim**
+
+To implement and simulate Star Topology using Network Simulator-2.
+
+### **Simple code**
+
+```
+
+set ns [new Simulator]
+
+set nf [open star.nam w]
+$ns namtrace-all $nf
+
+set tf [open star.tr w]
+$ns trace-all $tf
+
+$ns color 1 Orange
+
+proc finish {} {
+    global ns nf tf
+    $ns flush-trace
+    close $nf
+    close $tf
+    exec nam star.nam &
+    exit 0
+}
+
+# Create 6 nodes
+for {set i 0} {$i < 6} {incr i} {
+    set n($i) [$ns node]
+}
+
+# Central hub
+$n(0) shape square
+$n(0) color Magenta
+$n(0) label Hub
+
+# Connect all nodes to hub
+for {set i 1} {$i < 6} {incr i} {
+    $ns duplex-link $n(0) $n($i) 1Mb 10ms DropTail
+}
+
+# TCP connection
+set tcp [new Agent/TCP]
+$tcp set class_ 1
+$ns attach-agent $n(1) $tcp
+
+set sink [new Agent/TCPSink]
+$ns attach-agent $n(3) $sink
+
+$ns connect $tcp $sink
+
+# FTP traffic
+set ftp [new Application/FTP]
+$ftp attach-agent $tcp
+
+$ns at 0.5 "$ftp start"
+$ns at 4.5 "$ftp stop"
+
+$ns at 5.0 "finish"
+
+$ns run
+
+```
+
+### **Explanation**
+
+- Star topology has one central node called the hub.
+- Six nodes are created.
+- Node 0 acts as the hub.
+- All remaining nodes connect to the hub.
+- TCP and FTP are used for data transmission.
+
+### **Procedure**
+
+1. Open Ubuntu terminal.
+2. Create `star.tcl`.
+3. Paste the code.
+4. Save the file.
+5. Run:
+
+```
+ns star.tcl
+```
+
+6\. Observe the star topology in NAM.
+
+### **Expected output**
+
+[Network Simulator 2 (Ns2) : Ns2 Advantages And Disadvantages](https://images.openai.com/static-rsc-4/yAcNhjHSpg01pnEPNmDehp1pRGupqsZbuFHv2fj0KHDRJ-np2zj4OLPi3VeMGgpWsPrJa-E10DrBkwkE7whzaqKUDro3fykwjQ-Mwl973KjDCkAZ8IlYZZJ-fPPG5aelQN4GjPfXbuyc4ekacE2E_NwITHfLznml9f2teHU9Dl0?purpose=inline)
+
+[tutorialsweb.com](https://www.tutorialsweb.com/ns2/NS2-7.htm?utm_source=chatgpt.com)
+
+One central hub connected to five other nodes.
+
+### **Result**
+
+Thus, we have implemented Star Topology and observed data transmission from the transmitter node through the hub to the receiver node.
+
+## **D. Mesh Topology**
+
+### **Aim**
+
+To implement and simulate Mesh Topology using Network Simulator-2.
+
+### **Simple code**
+
+```
+
+set ns [new Simulator]
+
+set a 5
+set stop 21.0
+
+set nf [open mesh.nam w]
+$ns namtrace-all $nf
+
+set tf [open mesh.tr w]
+$ns trace-all $tf
+
+$ns color 1 Magenta
+
+proc finish {} {
+    global ns nf tf
+    $ns flush-trace
+    close $nf
+    close $tf
+    exec nam mesh.nam &
+    exit 0
+}
+
+# Create 5 nodes
+for {set i 0} {$i < $a} {incr i} {
+    set n($i) [$ns node]
+}
+
+# Connect every node to every other node
+for {set i 0} {$i < $a-1} {incr i} {
+    for {set j [expr $i+1]} {$j < $a} {incr j} {
+        $ns duplex-link $n($i) $n($j) 512Kb 5ms DropTail
+    }
+}
+
+# TCP connection
+set tcp [new Agent/TCP]
+$tcp set class_ 1
+$ns attach-agent $n(0) $tcp
+
+set sink [new Agent/TCPSink]
+$ns attach-agent $n(2) $sink
+
+$ns connect $tcp $sink
+
+# FTP traffic
+set ftp [new Application/FTP]
+$ftp attach-agent $tcp
+
+$ns at 10.0 "$ftp start"
+$ns at 20.0 "$ftp stop"
+
+$ns at $stop "finish"
+
+$ns run
+
+```
+
+### **Explanation**
+
+- Mesh topology connects every node to every other node.
+- Five nodes are created.
+- Each node has a direct link to the other nodes.
+- TCP provides reliable communication.
+- FTP generates data traffic.
+
+### **Procedure**
+
+1. Open Ubuntu terminal.
+2. Create `mesh.tcl`.
+3. Paste the code.
+4. Save the file.
+5. Run:
+
+```
+ns mesh.tcl
+```
+
+6\. Observe the mesh topology in NAM.
+
+### **Expected output**
+
+[PPT - Network Simulation Using NS2 PowerPoint Presentation, free download - ID:3157088](https://images.openai.com/static-rsc-4/DpEiPCkIWQ0FVn3BoN4SC_dfGEjAEKxaM1T9zKyiWP5MYb5mDMF6VQFD0QKDeIpw8UuTzu7Zt6bkb5MvnXsEeBHshSQa_XbPSlrr_1DSoOpXlFZ4Ued3buy8ECT86dX71eQiVP9FOm0C3o08LMCcyXHPQ-GaXZPZPOR0xUKc5Fw?purpose=inline)
+
+[slideserve.com](https://www.slideserve.com/nau/network-simulation-using-ns2?utm_source=chatgpt.com)
+
+Five nodes are interconnected with multiple links, and packets travel between nodes.
+
+### **Result**
+
+Thus, we have implemented Mesh Topology and observed data transmission between different nodes.
+
+# **Important differences between the four topologies**
+
+[Back to Basics #2: OSI Model. 2013 — The year when I started the… | by Norman Kolarikkal | Medium](https://images.openai.com/static-rsc-4/6RST17gKCtbP3paPEm9gI7aaF0KOAfftwUf3alb7amyipazXqSwmiUp1tC3_v2cBGhrzL1v0cyw6O664-dIqJG7ptOuK2Iaaf1YKCub4VUQLzi8pmKHmmcW55DWRM67bg4GVPLD9fw8raE9gmdgzi34FGqbG0NxsPYFCQLchYRo?purpose=inline)
+
+**Bus:** Linear shared communication medium.
+
+[Network Topologies, Types of Topologies, Assignment Help](https://images.openai.com/static-rsc-4/VIe0mrcF8sK9Au0poQT1KNhmXzOToP-b-i4Pu5HtAoB359T7hfHIlkWK80W1aAA__p43yuOJLqB64mqYR-Nnbr34ABPAElnwToNCkFMgpRm7LkwLP039bh_AF_wBXWyuOZbovVQVrlSzHbJC5ruCnwQWJU0ctxnGZPvPi_JxB4s?purpose=inline)
+
+**Ring:** Circular connection.
+
+[Star Topology in Computer Networks: Types, Applications](https://images.openai.com/static-rsc-4/yyCduVmrZpuywW5USa3eVuBiLrikuenutix-7YggCk_eviM6oQTLb_nZTKGF1PQYWWpHVzLBFrm7nBJJKXn1xrEjv-40rL-kvWkNbQiK3lN1ja676xqd27ndHU2nFtKaDioGUZ4hO4T21Tucz6O4pJj7OT45q0J_DD3tgpZgS10?purpose=inline)
+
+**Star:** Central hub.
+
+
+**Mesh:** Multiple direct connections.
+
+## **How to run all four programs**
+
+Save each program separately:
+
+| Topology | Filename | Run command   |
+| -------- | -------- | ------------- |
+| Bus      | bus.tcl  | `ns bus.tcl`  |
+| Ring     | ring.tcl | `ns ring.tcl` |
+| Star     | star.tcl | `ns star.tcl` |
+| Mesh     | mesh.tcl | `ns mesh.tcl` |
+
+To create and run a file:
+
+```
+nano star.tcl
+```
+
+Paste code, save using `Ctrl + O`, Enter, `Ctrl + X`.
+
+Then:
+
+```
+ns star.tcl
+```
+
+
+**For your external, remember:**
+
+- Bus = Linear arrangement
+- Ring = Circular arrangement
+- Star = Central hub
+- Mesh = Every node connected to other nodes
+
+These four definitions and their diagrams are particularly important for viva questions.
+
+
+
+
+
+
 
 # **Experiment 4: Stop-and-Wait Protocol and Sliding Window Protocol**
 
@@ -389,6 +838,10 @@ Acknowledgement received
 
 All frames transmitted successfully
 ```
+
+
+
+
 
 # **Experiment 5: Implementation of Bit Stuffing and Bit Destuffing**
 
@@ -501,6 +954,10 @@ Stuffed data:
 Destuffed data:
 11111011111
 ```
+
+
+
+
 
 # **Experiment 6: Implementation of CRC and DCRC using MATLAB**
 
