@@ -1,0 +1,1201 @@
+# **Computer Networks Lab – Complete External Preparation**
+
+This guide covers all **10 CN Lab experiments** from your CBIT lab index.
+
+For every experiment, I'll give you:
+
+1. **Aim** – what to write in your record.
+2. **Simple code** – easy-to-understand program.
+3. **Explanation** – what each important part does.
+4. **Procedure** – steps to perform the experiment.
+5. **Expected output** – what you should see.
+6. **How to run** – commands to execute the program.
+
+## **First: Software required**
+
+Your experiments use two environments:
+
+[대학생이 리눅스 우분투를 2년간 써보면서 (Ubuntu 22.04) — 쓰기 전에 생각하자](https://images.openai.com/static-rsc-4/bF59MORMZ4qphvtglvWGYgBa5ni09ANAlMmB55QUd-o9yFozSeAyRZhIul-Yhtc7SobhfLUU-4MCQriFsymzoz_2dAFJUCIsw9UYvm3azBeLxrfJ1rODldsoPSSI2YcYF7uQIgpvcbzob4CNfV8QIOZBpxwtKnhhXzgklJ4o9pM?purpose=inline)
+
+**1. NS2 (Network Simulator 2)**
+
+Used for network topology, routing and wired/wireless network experiments.
+
+Run Tcl files in Ubuntu terminal.
+
+[MATLAB Logo PNG,  Vector (AI, EPS, CDR, PDF, SVG) - iconLogoVector](https://images.openai.com/static-rsc-4/wxIpbcbPYu9893DLd0BnQYyjhSdRfrYabYxKFvp9D_NiDy_rGc7Zxl1Ri5ZxIqX_cimH7BJiiAPSntfSGTzhq5azHnaokcApvGPhXt9ZEnNNOpEcfth_-sdC3dZsWtzGx6ryMydrdrP0Qt-hV38vzFU2G3Z4I36C41LHODauLlw?purpose=inline)
+
+**2. MATLAB**
+
+Used for Bit Stuffing, CRC, DCRC and Hamming Code.
+
+Run MATLAB `.m` files.
+
+### **How to run the programs**
+
+**For NS2 programs:**
+
+1. Open Ubuntu terminal.
+2. Create a file using:
+   ```
+   nano experiment.tcl
+   ```
+3. Paste the Tcl code.
+4. Save using `Ctrl + O`, Enter, then `Ctrl + X`.
+5. Run:
+   ```
+   ns experiment.tcl
+   ```
+
+**For MATLAB programs:**
+
+1. Open MATLAB.
+2. Click New Script.
+3. Paste the MATLAB code.
+4. Save it with a `.m` extension.
+5. Click Run.
+
+# **Experiment 1: Introduction to Network Simulator**
+
+### **Aim**
+
+To study the Network Simulator (NS2) and understand its basic features.
+
+### **Simple code**
+
+```
+set ns [new Simulator]
+
+set nf [open out.nam w]
+$ns namtrace-all $nf
+
+set n0 [$ns node]
+set n1 [$ns node]
+
+$ns duplex-link $n0 $n1 1Mb 10ms DropTail
+
+set udp [new Agent/UDP]
+$ns attach-agent $n0 $udp
+
+set null [new Agent/Null]
+$ns attach-agent $n1 $null
+
+$ns connect $udp $null
+
+set cbr [new Application/Traffic/CBR]
+$cbr attach-agent $udp
+
+$ns at 1.0 "$cbr start"
+$ns at 4.0 "$cbr stop"
+
+proc finish {} {
+    global ns nf
+    $ns flush-trace
+    close $nf
+    exec nam out.nam &
+    exit 0
+}
+
+$ns at 5.0 "finish"
+$ns run
+```
+
+### **Explanation**
+
+- `Simulator`: Creates a new network simulator.
+- `node`: Creates network devices.
+- `duplex-link`: Connects two nodes.
+- `UDP`: Provides transport communication.
+- `CBR`: Generates constant bit-rate traffic.
+- `namtrace-all`: Records network activity.
+- `nam`: Displays the network animation.
+
+### **Procedure**
+
+1. Open Ubuntu terminal.
+2. Create `exp1.tcl`.
+3. Enter the code.
+4. Save the file.
+5. Execute `ns exp1.tcl`.
+6. Observe the network animation.
+
+### **Expected output**
+
+[Network Simulator 2 Installation (NS2) — pinguindocs 0.0.1 documentation](https://images.openai.com/static-rsc-4/VT4xmWeqCE71yWVzOGZOXEXJMhfiIwCAEVPHwV_iPGethWu-MN7mu_2T3eyZgF8NEcFiFhj0JL1Ndp3DKsGgdo8RRbQ6VQZEarJ60Or3q-l32DFlLhGjR9Y4s0Fd42fYxmN1-2PskGIDjVijo7bj5LXdB_mvGTVz-RbnvJDboCM?purpose=inline)
+
+[pinguindocs.readthedocs.io](https://pinguindocs.readthedocs.io/en/latest/ns2.html?utm_source=chatgpt.com)
+
+- Two nodes are created.
+- A link is established.
+- Packets travel from node 0 to node 1.
+- NAM displays packet transmission.
+
+# **Experiment 2: Implementation of 2-Node Network**
+
+### **Aim**
+
+To implement and simulate a two-node network using NS2.
+
+### **Code**
+
+```
+set ns [new Simulator]
+
+set nf [open exp2.nam w]
+$ns namtrace-all $nf
+
+set n0 [$ns node]
+set n1 [$ns node]
+
+$ns duplex-link $n0 $n1 1Mb 10ms DropTail
+
+set udp [new Agent/UDP]
+$ns attach-agent $n0 $udp
+
+set null [new Agent/Null]
+$ns attach-agent $n1 $null
+
+$ns connect $udp $null
+
+set cbr [new Application/Traffic/CBR]
+$cbr set packetSize_ 500
+$cbr set interval_ 0.1
+$cbr attach-agent $udp
+
+$ns at 1.0 "$cbr start"
+$ns at 4.0 "$cbr stop"
+
+proc finish {} {
+    global ns nf
+    $ns flush-trace
+    close $nf
+    exec nam exp2.nam &
+    exit 0
+}
+
+$ns at 5.0 "finish"
+$ns run
+```
+
+### **Explanation**
+
+- Two nodes are created: sender and receiver.
+- A 1 Mbps link connects them.
+- UDP is used for sending packets.
+- CBR generates packets every 0.1 seconds.
+- NAM shows the packet movement.
+
+### **Procedure**
+
+1. Create `exp2.tcl`.
+2. Paste the code.
+3. Save the file.
+4. Run `ns exp2.tcl`.
+5. Observe the two-node network in NAM.
+
+### **Expected output**
+
+[Network Simulator 2: a Simulation Tool for Linux | Linux Journal](https://images.openai.com/static-rsc-4/TGcdoZLNIz1RrvY68qBVqXJ17T4d5bawwVyP44VscGik3Kel3jb_Y-PGwFxWUHgUP7_PPiJsvVhQf4yP2KRzt8fssuZsYg6XbxUScL2qBJvudcQn8vq4VXbJQSz5WdW5IY7FwjXzEop8jkS_aHPbdh7bHomccfVjk0A6Lyv5CY0?purpose=inline)
+
+[linuxjournal.com](https://www.linuxjournal.com/article/5929?utm_source=chatgpt.com)
+
+Two nodes connected by a duplex link with packets travelling between them.
+
+# **Experiment 3: Implementation of Different Network Topologies**
+
+### **Aim**
+
+To implement and simulate different network topologies using NS2.
+
+### **Code – Star topology**
+
+```
+set ns [new Simulator]
+
+set nf [open exp3.nam w]
+$ns namtrace-all $nf
+
+set n0 [$ns node]
+set n1 [$ns node]
+set n2 [$ns node]
+set n3 [$ns node]
+set n4 [$ns node]
+
+$ns duplex-link $n0 $n1 1Mb 10ms DropTail
+$ns duplex-link $n0 $n2 1Mb 10ms DropTail
+$ns duplex-link $n0 $n3 1Mb 10ms DropTail
+$ns duplex-link $n0 $n4 1Mb 10ms DropTail
+
+set udp [new Agent/UDP]
+$ns attach-agent $n1 $udp
+
+set null [new Agent/Null]
+$ns attach-agent $n3 $null
+
+$ns connect $udp $null
+
+set cbr [new Application/Traffic/CBR]
+$cbr attach-agent $udp
+
+$ns at 1.0 "$cbr start"
+$ns at 4.0 "$cbr stop"
+
+proc finish {} {
+    global ns nf
+    $ns flush-trace
+    close $nf
+    exec nam exp3.nam &
+    exit 0
+}
+
+$ns at 5.0 "finish"
+$ns run
+```
+
+### **Explanation**
+
+A star topology contains one central node connected to all other nodes.
+
+- Node 0 is the central node.
+- Nodes 1, 2, 3 and 4 are connected to node 0.
+- Data travels through the central node.
+
+### **Other topologies**
+
+[Network Topologies (Bus, Star, Ring) Revision Notes — OCR GCSE | MasteryMind](https://images.openai.com/static-rsc-4/fzsGDasWVw4JeZBdVmH7g_az2UV8p-BydKzy4rsBwhMaTBnNDvdknZNe5inMp4yZecAPuQIw_oAz7gHiZ0xpzqHZalPP6mDxYdV3jimZ8rJPciZEIKrIOuCwzCOgRcndXoy-ezoQdmVDDk6WnT6GbRmJapMPCRXWpYnNMzYQZuI?purpose=inline)
+
+**Bus topology**
+
+All nodes share one communication link.
+
+[Network Topologies](https://images.openai.com/static-rsc-4/edQaJUQ60m2SBf9smMGB7xHygcnIZLoZguIlB7AzwJxzIht8BfnR-yFNSzxrBleQnW37OVDhcbl4WKEpPk5Gx-9IsLf7IQ5pJjzCx3qvlTYT7OUa7gj13-t0MsEQsF-yYT7-pShDjFq2Gnu2gFSJ-eDnEekjtWT4Xo6GdZEh6_I?purpose=inline)
+
+**Star topology**
+
+All nodes connect to a central node.
+
+[What is a Network Topology? (Explained Like You’re Five… But Cooler) – Codango® / Codango.Com](https://images.openai.com/static-rsc-4/2FTCebDB9h5iOIUNC-jRakA85cyUAR4L6cGAuCXZVlWuwm3gZJxkrkzABZaXlBC6osXFkeRtdHNzvqX90SHlIwCTY37f_JfHyMlqUEAZ4CaeCDPuoRtnFJBqv1zKePj0Rn0ScSFUpOJmI0rm4vEifTPNIGHJ6a4IwjSKEEendEY?purpose=inline)
+
+**Ring topology**
+
+Nodes form a closed loop.
+
+[computer networks foundations. Wed, 1st may | by Dheeraj Mourya | Medium](https://images.openai.com/static-rsc-4/gr3rbaN4DCJ-aozusqvaIStPQLv1XGOsHrdkg3_DLtkoGnp18iYxOVPI-efBnOtylaGSABEzdKAUwbiMl0_MHReCdl072fRYTfbzko_1oPczOyhz76a3VovKe6KuSvJQKr2U_M-i4vMsc0jyxdgaeyjRM7G7ROSyyHbGb-oAolE?purpose=inline)
+
+**Mesh topology**
+
+Nodes have multiple interconnections.
+
+### **Procedure**
+
+1. Open Ubuntu terminal.
+2. Create `exp3.tcl`.
+3. Enter the star topology code.
+4. Save and execute it.
+5. Observe the network in NAM.
+
+### **Expected output**
+
+A star topology with five nodes is displayed, and packets travel between the connected nodes.
+
+# **Experiment 4: Stop-and-Wait Protocol and Sliding Window Protocol**
+
+### **Aim**
+
+To simulate Stop-and-Wait and Sliding Window Protocols and study reliable data transmission.
+
+### **A. Stop-and-Wait Protocol – MATLAB code**
+
+```
+clc;
+clear all;
+
+n = input('Enter number of frames: ');
+
+for i = 1:n
+    fprintf('Frame %d sent\n',i);
+    fprintf('Acknowledgement %d received\n',i);
+end
+
+disp('All frames transmitted successfully');
+```
+
+### **B. Sliding Window Protocol – MATLAB code**
+
+```
+clc;
+clear all;
+
+n = input('Enter number of frames: ');
+w = input('Enter window size: ');
+
+i = 1;
+
+while i <= n
+    fprintf('\nSending window:\n');
+
+    for j = i:min(i+w-1,n)
+        fprintf('Frame %d sent\n',j);
+    end
+
+    fprintf('Acknowledgement received\n');
+
+    i = i+w;
+end
+
+disp('All frames transmitted successfully');
+```
+
+### **Explanation**
+
+**Stop-and-Wait:**
+
+- Sender sends one frame.
+- Sender waits for acknowledgement (ACK).
+- After receiving ACK, the next frame is sent.
+
+**Sliding Window:**
+
+- Sender sends multiple frames at a time.
+- Window size decides how many frames can be sent.
+- Sender moves to the next window after acknowledgement.
+
+### **Procedure**
+
+1. Open MATLAB.
+2. Create a new script.
+3. Enter the Stop-and-Wait code.
+4. Save as `stopwait.m`.
+5. Run and enter the number of frames.
+6. Repeat using the Sliding Window code saved as `sliding.m`.
+
+### **Expected output**
+
+For Stop-and-Wait, input `3`:
+
+```
+Frame 1 sent
+Acknowledgement 1 received
+Frame 2 sent
+Acknowledgement 2 received
+Frame 3 sent
+Acknowledgement 3 received
+All frames transmitted successfully
+```
+
+For Sliding Window, input frames `5`, window size `2`:
+
+```
+Sending window:
+Frame 1 sent
+Frame 2 sent
+Acknowledgement received
+
+Sending window:
+Frame 3 sent
+Frame 4 sent
+Acknowledgement received
+
+Sending window:
+Frame 5 sent
+Acknowledgement received
+
+All frames transmitted successfully
+```
+
+# **Experiment 5: Implementation of Bit Stuffing and Bit Destuffing**
+
+### **Aim**
+
+To implement Bit Stuffing and Bit Destuffing techniques using MATLAB.
+
+### **Simple code**
+
+```
+clc;
+clear all;
+
+data = input('Enter binary data: ','s');
+
+stuffed = '';
+count = 0;
+
+% Bit Stuffing
+for i = 1:length(data)
+
+    stuffed = [stuffed data(i)];
+
+    if data(i) == '1'
+        count = count + 1;
+    else
+        count = 0;
+    end
+
+    if count == 5
+        stuffed = [stuffed '0'];
+        count = 0;
+    end
+end
+
+disp('Stuffed data:');
+disp(stuffed);
+
+% Bit Destuffing
+destuffed = '';
+count = 0;
+i = 1;
+
+while i <= length(stuffed)
+
+    destuffed = [destuffed stuffed(i)];
+
+    if stuffed(i) == '1'
+        count = count + 1;
+    else
+        count = 0;
+    end
+
+    if count == 5
+        i = i + 1;
+        count = 0;
+    end
+
+    i = i + 1;
+end
+
+disp('Destuffed data:');
+disp(destuffed);
+```
+
+### **Explanation**
+
+**Bit Stuffing:**
+
+- When five consecutive 1s occur, an extra 0 is inserted.
+- This prevents confusion with special flag patterns.
+
+**Bit Destuffing:**
+
+- The extra 0 inserted by the sender is removed.
+- Original data is recovered.
+
+Example:
+
+**Original data**
+
+# **111110**
+
+**After bit stuffing**
+
+# **1111100**
+
+**After bit destuffing**
+
+# **111110**
+
+### **Procedure**
+
+1. Open MATLAB.
+2. Create a new script.
+3. Paste the code.
+4. Save as `bitstuffing.m`.
+5. Click Run.
+6. Enter binary data such as `11111011111`.
+7. Observe stuffed and destuffed data.
+
+### **Expected output**
+
+```
+Enter binary data: 11111011111
+
+Stuffed data:
+1111100111110
+
+Destuffed data:
+11111011111
+```
+
+# **Experiment 6: Implementation of CRC and DCRC using MATLAB**
+
+### **Aim**
+
+To simulate and implement Cyclic Redundancy Check (CRC) and Destination Cyclic Redundancy Check (DCRC) for a given message using MATLAB.
+
+### **Simple code**
+
+```
+clc;
+clear all;
+
+% Transmitter
+m = input('Enter message: ','s');
+g = input('Enter generator: ','s');
+
+lm = length(m);
+lg = length(g);
+
+data = [m repmat('0',1,lg-1)];
+
+temp = data;
+
+for i = 1:lm
+    if temp(i) == '1'
+        for j = 1:lg
+            temp(i+j-1) = char(48 + xor( ...
+                temp(i+j-1)=='1',g(j)=='1'));
+        end
+    end
+end
+
+crc = temp(end-lg+2:end);
+
+frame = [m crc];
+
+disp('CRC remainder:');
+disp(crc);
+
+disp('Transmitted frame:');
+disp(frame);
+
+% Receiver
+r = input('Enter received frame: ','s');
+
+temp = r;
+
+for i = 1:length(r)-lg+1
+    if temp(i) == '1'
+        for j = 1:lg
+            temp(i+j-1) = char(48 + xor( ...
+                temp(i+j-1)=='1',g(j)=='1'));
+        end
+    end
+end
+
+remainder = temp(end-lg+2:end);
+
+disp('Receiver remainder:');
+disp(remainder);
+
+if all(remainder=='0')
+    disp('No error detected');
+else
+    disp('Error detected');
+end
+```
+
+### **Explanation**
+
+CRC is an error-detection technique used in data communication.
+
+- Sender enters the message and generator polynomial.
+- Zeros are added to the message.
+- Binary division using XOR is performed.
+- The remainder is added to the original message.
+- Receiver performs the same division.
+- If remainder is zero, no error is detected.
+
+**Important terms:**
+
+| Term      | Meaning                   |
+| --------- | ------------------------- |
+| CRC       | Cyclic Redundancy Check   |
+| DCRC      | Destination CRC checking  |
+| XOR       | Exclusive OR operation    |
+| Generator | Divisor used in CRC       |
+| Remainder | CRC bits added to message |
+
+### **Procedure**
+
+1. Open MATLAB.
+2. Create a new script.
+3. Paste the code.
+4. Save as `crc.m`.
+5. Click Run.
+6. Enter a binary message and generator.
+7. Enter the transmitted frame at the receiver prompt.
+8. Observe whether an error is detected.
+
+### **Expected output**
+
+Example:
+
+```
+Enter message: 1101
+Enter generator: 1011
+
+CRC remainder:
+001
+
+Transmitted frame:
+1101001
+
+Enter received frame: 1101001
+
+Receiver remainder:
+000
+
+No error detected
+```
+
+The CRC remainder and frame are based on the example inputs. Use the same generator at the transmitter and receiver.
+
+# **Experiment 7: Implementation of Hamming Code at Transmitter and Receiver**
+
+### **Aim**
+
+To simulate and implement Hamming Code at the transmitter and receiver sides and verify transmission errors using MATLAB.
+
+### **Simple code – Hamming (7,4)**
+
+```
+clc;
+clear all;
+
+% Transmitter
+d = input('Enter 4 data bits: ','s');
+
+if length(d) ~= 4 || any(d ~= '0' & d ~= '1')
+    error('Enter exactly 4 binary bits');
+end
+
+d = d - '0';
+
+% Hamming code positions
+h = zeros(1,7);
+
+h(3) = d(1);
+h(5) = d(2);
+h(6) = d(3);
+h(7) = d(4);
+
+% Calculate parity bits
+h(1) = mod(h(3)+h(5)+h(7),2);
+h(2) = mod(h(3)+h(6)+h(7),2);
+h(4) = mod(h(5)+h(6)+h(7),2);
+
+disp('Transmitted Hamming code:');
+disp(h);
+
+% Receiver
+r = input('Enter received 7 bits: ','s');
+
+if length(r) ~= 7 || any(r ~= '0' & r ~= '1')
+    error('Enter exactly 7 binary bits');
+end
+
+r = r - '0';
+
+% Syndrome calculation
+s1 = mod(r(1)+r(3)+r(5)+r(7),2);
+s2 = mod(r(2)+r(3)+r(6)+r(7),2);
+s4 = mod(r(4)+r(5)+r(6)+r(7),2);
+
+error_pos = s1 + 2*s2 + 4*s4;
+
+if error_pos == 0
+    disp('No error detected');
+else
+    fprintf('Error at bit position %d\n',error_pos);
+
+    r(error_pos) = 1-r(error_pos);
+end
+
+disp('Corrected message:');
+disp(r([3 5 6 7]));
+```
+
+### **Explanation**
+
+Hamming Code is an error-detection and error-correction technique.
+
+- Four data bits are taken.
+- Three parity bits are calculated.
+- Seven bits are transmitted.
+- Receiver calculates the syndrome.
+- Syndrome identifies the error position.
+- The incorrect bit is corrected.
+
+[Hamming Code : construction, encoding & decoding – GaussianWaves](https://images.openai.com/static-rsc-4/gz0QbvFSOEqHHS7co-zQk6qBTTyJoDNeDKe8cZ3huUgmqTeXP6UaWgvYhaQ6T0p9bzeXgwx3DnaaNUtyzR3S-f4GqDL4nNLeZCUqSB7NrjpmHzRaEfxasxqk8-zNsWDDRW5B6SSDV4eV08VBK42HWlnOlhDkwqjXRmDIbqtOAJg?purpose=inline)
+
+[gaussianwaves.com](https://www.gaussianwaves.com/2008/05/hamming-codes-how-it-works/?utm_source=chatgpt.com)
+
+**Hamming (7,4):**
+
+- 4 data bits
+- 3 parity bits
+- 7 total bits
+
+### **Procedure**
+
+1. Open MATLAB.
+2. Create a new script.
+3. Paste the code.
+4. Save as `hamming.m`.
+5. Run the program.
+6. Enter four binary data bits.
+7. Enter the received seven-bit code.
+8. Observe error detection and correction.
+
+### **Expected output**
+
+Example input:
+
+```
+Enter 4 data bits: 1011
+
+Transmitted Hamming code:
+1 0 1 0 0 1 1
+
+Enter received 7 bits: 1010111
+
+Error at bit position 5
+
+Corrected message:
+1 0 1 1
+```
+
+# **Experiment 8: Implementation of Static Routing**
+
+### **Aim**
+
+To simulate and implement static routing using Network Simulator 2.
+
+### **Simple code (NS2)**
+
+```
+set ns [new Simulator]
+
+set nf [open exp8.nam w]
+$ns namtrace-all $nf
+
+set n0 [$ns node]
+set n1 [$ns node]
+set n2 [$ns node]
+set n3 [$ns node]
+
+$ns duplex-link $n0 $n1 1Mb 10ms DropTail
+$ns duplex-link $n1 $n2 1Mb 10ms DropTail
+$ns duplex-link $n2 $n3 1Mb 10ms DropTail
+
+$ns duplex-link $n0 $n2 1Mb 20ms DropTail
+
+$ns rtproto Static
+
+set udp [new Agent/UDP]
+$ns attach-agent $n0 $udp
+
+set null [new Agent/Null]
+$ns attach-agent $n3 $null
+
+$ns connect $udp $null
+
+set cbr [new Application/Traffic/CBR]
+$cbr attach-agent $udp
+
+$ns at 1.0 "$cbr start"
+$ns at 4.0 "$cbr stop"
+
+proc finish {} {
+    global ns nf
+    $ns flush-trace
+    close $nf
+    exec nam exp8.nam &
+    exit 0
+}
+
+$ns at 5.0 "finish"
+$ns run
+```
+
+### **Explanation**
+
+Static routing means the network administrator manually configures routes.
+
+- Nodes represent routers.
+- Links connect the routers.
+- Routing tables contain fixed paths.
+- Packets follow the configured routes.
+
+[Dynamic Routing và Static Routing – Đâu là giải pháp tối ưu cho hệ thống mạng? - RAYCOM Distribution](https://images.openai.com/static-rsc-4/l6ZgIh4-OmOWCJYyD6WUiTZoP2jRTZ9-QXiINdyifLaWd70fr0bjruJTkVRepuKMaAX6MAEXf-OLsFdGiD-w9af5IdUbr6vNpXEvpEXLU0MhvyS5SLn1ZfgDe0PXwtpdLSGFheh_76ZWxwxQPVHp8B4MQT1y2HCUXrXjdB14Ank?purpose=inline)
+
+[raycom.vn](https://raycom.vn/dynamic-routing-va-static-routing-dau-la-giai-phap-toi-uu-cho-he-thong-mang/?utm_source=chatgpt.com)
+
+### **Procedure**
+
+1. Open Ubuntu terminal.
+2. Create `exp8.tcl`.
+3. Paste the code.
+4. Save the file.
+5. Execute:
+
+```
+ns exp8.tcl
+```
+
+6\. Observe the network in NAM.
+
+### **Expected output**
+
+- Four nodes are created.
+- Links connect the nodes.
+- Packets travel from source to destination.
+- NAM displays the network topology.
+
+# **Experiment 9: Implementation of Distance Vector Routing**
+
+### **Aim**
+
+To simulate and implement Distance Vector Routing using NS2.
+
+### **Simple code**
+
+```
+set ns [new Simulator]
+
+set nf [open exp9.nam w]
+$ns namtrace-all $nf
+
+set n0 [$ns node]
+set n1 [$ns node]
+set n2 [$ns node]
+set n3 [$ns node]
+
+$ns duplex-link $n0 $n1 1Mb 10ms DropTail
+$ns duplex-link $n1 $n2 1Mb 10ms DropTail
+$ns duplex-link $n2 $n3 1Mb 10ms DropTail
+
+$ns duplex-link $n0 $n2 1Mb 20ms DropTail
+
+$ns rtproto DV
+
+set udp [new Agent/UDP]
+$ns attach-agent $n0 $udp
+
+set null [new Agent/Null]
+$ns attach-agent $n3 $null
+
+$ns connect $udp $null
+
+set cbr [new Application/Traffic/CBR]
+$cbr attach-agent $udp
+
+$ns at 1.0 "$cbr start"
+$ns at 4.0 "$cbr stop"
+
+proc finish {} {
+    global ns nf
+    $ns flush-trace
+    close $nf
+    exec nam exp9.nam &
+    exit 0
+}
+
+$ns at 5.0 "finish"
+$ns run
+```
+
+### **Explanation**
+
+Distance Vector Routing is a dynamic routing technique.
+
+- Each router maintains a routing table.
+- Routers exchange routing information with neighbours.
+- The best path is selected based on distance or cost.
+- Routing tables are updated when network conditions change.
+
+[Distance Vector Routing​ protocol in computer networks | PPTX](https://images.openai.com/static-rsc-4/gfw_-BZnWQSoA3GlFJ7iEvVh3EpZXMHEspkxu1TDzf8GaAwoSzwLHVTDf06c2uQV-IYVaHr3uJw_GkM6KuDOW4AOp4p6O1qaykaKPyuUTYY12ajSWBQ46vawfaac-NSOGmnNVOfXyzdRdLpBEBEHTRkIzOoArAsYfvXiQHgDxds?purpose=inline)
+
+[slideshare.net](https://www.slideshare.net/slideshow/distance-vector-routing-protocol-in-computer-networks/284636835?utm_source=chatgpt.com)
+
+### **Difference between Static and Distance Vector Routing**
+
+| Static Routing              | Distance Vector               |
+| --------------------------- | ----------------------------- |
+| Manually configured         | Automatically updated         |
+| Fixed routes                | Routes can change             |
+| No routing updates          | Exchanges routing information |
+| Suitable for small networks | Suitable for dynamic networks |
+
+### **Procedure**
+
+1. Open Ubuntu terminal.
+2. Create `exp9.tcl`.
+3. Paste the code.
+4. Save the file.
+5. Execute:
+
+```
+ns exp9.tcl
+```
+
+6\. Observe the network animation.
+
+### **Expected output**
+
+- Four network nodes are created.
+- Distance Vector routing is enabled.
+- Packets travel from source to destination.
+- Routing information is maintained by the routers.
+
+# **Experiment 10: Implementation of Wired and Wireless Ad-hoc Network using NS2**
+
+### **Aim**
+
+To simulate and implement wired and wireless ad-hoc networks using NS2.
+
+### **Part A: Wired Network**
+
+A wired network uses physical communication links such as cables to connect computers.
+
+### **Simple code**
+
+```
+set ns [new Simulator]
+
+set nf [open wired.nam w]
+$ns namtrace-all $nf
+
+set n0 [$ns node]
+set n1 [$ns node]
+set n2 [$ns node]
+
+$ns duplex-link $n0 $n1 1Mb 10ms DropTail
+$ns duplex-link $n1 $n2 1Mb 10ms DropTail
+
+set udp [new Agent/UDP]
+$ns attach-agent $n0 $udp
+
+set null [new Agent/Null]
+$ns attach-agent $n2 $null
+
+$ns connect $udp $null
+
+set cbr [new Application/Traffic/CBR]
+$cbr attach-agent $udp
+
+$ns at 1.0 "$cbr start"
+$ns at 4.0 "$cbr stop"
+
+proc finish {} {
+    global ns nf
+    $ns flush-trace
+    close $nf
+    exec nam wired.nam &
+    exit 0
+}
+
+$ns at 5.0 "finish"
+$ns run
+```
+
+### **Explanation**
+
+- Three nodes are created.
+- Nodes are connected using wired links.
+- UDP sends packets.
+- CBR generates traffic.
+- NAM displays packet transmission.
+
+### **Expected output**
+
+[Install NS2 (Network Simulator) on Ubuntu 18.04 | Blog](https://images.openai.com/static-rsc-4/ZWOss2iI91Kq7V6d1bn-DJqY338vbut7BZRMto_nDQw7YWaI-PRi5Kh8WVySdo2wcLJ4T2UovNj7a3EoPKY3mBNVajAsWyMV809ayHjV1UOUSPYD4JwzYNpVHTHpcX6MJCXajOiXQy27bOZnGIt_UWoSYJ48b7esuSzMBjGFgmM?purpose=inline)
+
+[absingh.com](https://www.absingh.com/ns2/?utm_source=chatgpt.com)
+
+### **Part B: Wireless Ad-hoc Network**
+
+### **Simple code (NS2)**
+
+```
+set ns [new Simulator]
+
+set tracefile [open wireless.tr w]
+$ns trace-all $tracefile
+
+set nf [open wireless.nam w]
+$ns namtrace-all-wireless $nf 500 500
+
+set topo [new Topography]
+$topo load_flatgrid 500 500
+
+create-god 3
+
+$ns node-config -adhocRouting DSDV \
+-llType LL \
+-macType Mac/802_11 \
+-ifqType Queue/DropTail/PriQueue \
+-ifqLen 50 \
+-antType Antenna/OmniAntenna \
+-propType Propagation/TwoRayGround \
+-phyType Phy/WirelessPhy \
+-channelType Channel/WirelessChannel \
+-topoInstance $topo \
+-agentTrace ON \
+-routerTrace ON \
+-macTrace OFF
+
+set n0 [$ns node]
+set n1 [$ns node]
+set n2 [$ns node]
+
+$n0 set X_ 100
+$n0 set Y_ 100
+$n0 set Z_ 0
+
+$n1 set X_ 200
+$n1 set Y_ 200
+$n1 set Z_ 0
+
+$n2 set X_ 300
+$n2 set Y_ 300
+$n2 set Z_ 0
+
+$ns initial_node_pos $n0 20
+$ns initial_node_pos $n1 20
+$ns initial_node_pos $n2 20
+
+set udp [new Agent/UDP]
+$ns attach-agent $n0 $udp
+
+set null [new Agent/Null]
+$ns attach-agent $n2 $null
+
+$ns connect $udp $null
+
+set cbr [new Application/Traffic/CBR]
+$cbr attach-agent $udp
+
+$ns at 1.0 "$cbr start"
+$ns at 4.0 "$cbr stop"
+
+proc finish {} {
+    global ns tracefile nf
+    $ns flush-trace
+    close $tracefile
+    close $nf
+    exec nam wireless.nam &
+    exit 0
+}
+
+$ns at 5.0 "finish"
+$ns run
+```
+
+### **Explanation**
+
+- Wireless nodes communicate without physical cables.
+- DSDV is used as the routing protocol.
+- IEEE 802.11 is used as the MAC protocol.
+- Nodes communicate through wireless signals.
+- UDP and CBR generate network traffic.
+
+[network programming - Arrange nodes in ns2 - Stack Overflow](https://images.openai.com/static-rsc-4/uHLCmTR7u3bwYraNoD8KdsdpiFgSkRaChx0fzkUEmfN46VXqpkLwyndepHs9AYB_4E6qk0KP5rhq2HikntniIg_x8rBese0jJ2j1-UxApE20Gh8OK21FqTcPrAXuRUhHJjXZcV0zRnSfWWbRp8jwk2hOo3mhwQ4R9JLOx0WEQUQ?purpose=inline)
+
+[stackoverflow.com](https://stackoverflow.com/questions/47359275/arrange-nodes-in-ns2?utm_source=chatgpt.com)
+
+### **Procedure**
+
+1. Open Ubuntu terminal.
+2. Create `wireless.tcl`.
+3. Paste the wireless code.
+4. Save the file.
+5. Execute:
+
+```
+ns wireless.tcl
+```
+
+6\. Observe the wireless network animation.
+
+### **Expected output**
+
+- Three wireless nodes are displayed.
+- Wireless communication takes place.
+- Packets travel between nodes.
+- NAM displays the wireless network.
+
+# **Important: How to execute NS2 programs in Ubuntu**
+
+First, check whether NS2 is installed:
+
+```
+ns
+```
+
+If it is installed, you should see an NS2 prompt similar to:
+
+```
+%
+```
+
+Type `exit` to leave it.
+
+Check NAM:
+
+```
+nam
+```
+
+If both commands work, you can run the experiments.
+
+**To run any experiment:**
+
+```
+cd ~/Desktop
+nano exp1.tcl
+```
+
+Paste the code and save it.
+
+Then:
+
+```
+ns exp1.tcl
+```
+
+To see the animation, NAM should open automatically.
+
+If NAM does not open, check that it is installed and that the `.nam` file was generated.
+
+# **Quick revision for your external**
+
+| Experiment | Topic                             | Software | Main concept          |
+| ---------- | --------------------------------- | -------- | --------------------- |
+| 1          | Introduction to NS2               | NS2      | Network simulation    |
+| 2          | Two-node network                  | NS2      | Node and link         |
+| 3          | Network topologies                | NS2      | Star, bus, ring, mesh |
+| 4          | Stop-and-Wait and Sliding Window  | MATLAB   | Flow control          |
+| 5          | Bit Stuffing and Destuffing       | MATLAB   | Framing               |
+| 6          | CRC and DCRC                      | MATLAB   | Error detection       |
+| 7          | Hamming Code                      | MATLAB   | Error correction      |
+| 8          | Static Routing                    | NS2      | Fixed routes          |
+| 9          | Distance Vector Routing           | NS2      | Dynamic routing       |
+| 10         | Wired and Wireless Ad-hoc Network | NS2      | Network communication |
+
+## **Important viva concepts to remember**
+
+| Question                   | Easy answer                                             |
+| -------------------------- | ------------------------------------------------------- |
+| What is a network?         | A group of connected computers that share data.         |
+| What is NS2?               | NS2 is a network simulation tool.                       |
+| What is NAM?               | Network Animator displays network activity.             |
+| What is a node?            | A device connected to a network.                        |
+| What is a link?            | A connection between two nodes.                         |
+| What is UDP?               | User Datagram Protocol.                                 |
+| What is TCP?               | Transmission Control Protocol.                          |
+| What is CBR?               | Constant Bit Rate traffic.                              |
+| What is CRC?               | Cyclic Redundancy Check.                                |
+| What is Hamming Code?      | A technique used to detect and correct errors.          |
+| What is routing?           | Finding a path to send packets.                         |
+| What is an ad-hoc network? | A wireless network without a fixed access point.        |
+| What is DSDV?              | Destination-Sequenced Distance Vector routing protocol. |
+| What is bit stuffing?      | Inserting a 0 after five consecutive 1s.                |
+
+**Two corrections before you copy these into your record:**
+
+- In Experiment 7, for input `1011`, the correct Hamming code using the parity arrangement in the program is `0110011`. If bit 5 is changed, the received code is `0110111`.
+- The index and photographed record pages appear to have slightly different experiment numbering. Follow the experiment titles in your faculty's final index.
+
+Also, the Stop-and-Wait and Sliding Window examples are simplified demonstrations of frame transmission and acknowledgement, rather than full NS2 protocol implementations. The static routing script should be checked against your installed NS2 version because routing support can differ between builds.
+
+I can also prepare a **separate external practical guide with the exact commands to type, common errors and their solutions, and sample output screenshots** so you can practise each experiment on Ubuntu and MATLAB.
