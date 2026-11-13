@@ -1,31 +1,13 @@
-# **Computer Networks Lab – Complete External Preparation**
+Computer Networks Lab – Complete External Preparation
 
-This guide covers all **10 CN Lab experiments** from your CBIT lab index.
 
-For every experiment, I'll give you:
-
-1. **Aim** – what to write in your record.
-2. **Simple code** – easy-to-understand program.
-3. **Explanation** – what each important part does.
-4. **Procedure** – steps to perform the experiment.
-5. **Expected output** – what you should see.
-6. **How to run** – commands to execute the program.
-
-## **First: Software required**
-
-Your experiments use two environments:
-
-[대학생이 리눅스 우분투를 2년간 써보면서 (Ubuntu 22.04) — 쓰기 전에 생각하자](https://images.openai.com/static-rsc-4/bF59MORMZ4qphvtglvWGYgBa5ni09ANAlMmB55QUd-o9yFozSeAyRZhIul-Yhtc7SobhfLUU-4MCQriFsymzoz_2dAFJUCIsw9UYvm3azBeLxrfJ1rODldsoPSSI2YcYF7uQIgpvcbzob4CNfV8QIOZBpxwtKnhhXzgklJ4o9pM?purpose=inline)
-
-**1. NS2 (Network Simulator 2)**
+1. NS2 (Network Simulator 2)
 
 Used for network topology, routing and wired/wireless network experiments.
 
 Run Tcl files in Ubuntu terminal.
 
-[MATLAB Logo PNG,  Vector (AI, EPS, CDR, PDF, SVG) - iconLogoVector](https://images.openai.com/static-rsc-4/wxIpbcbPYu9893DLd0BnQYyjhSdRfrYabYxKFvp9D_NiDy_rGc7Zxl1Ri5ZxIqX_cimH7BJiiAPSntfSGTzhq5azHnaokcApvGPhXt9ZEnNNOpEcfth_-sdC3dZsWtzGx6ryMydrdrP0Qt-hV38vzFU2G3Z4I36C41LHODauLlw?purpose=inline)
-
-**2. MATLAB**
+2. MATLAB
 
 Used for Bit Stuffing, CRC, DCRC and Hamming Code.
 
@@ -33,7 +15,7 @@ Run MATLAB `.m` files.
 
 ### **How to run the programs**
 
-**For NS2 programs:**
+For NS2 programs:
 
 1. Open Ubuntu terminal.
 2. Create a file using:
@@ -47,13 +29,18 @@ Run MATLAB `.m` files.
    ns experiment.tcl
    ```
 
-**For MATLAB programs:**
+For MATLAB programs:
 
 1. Open MATLAB.
 2. Click New Script.
 3. Paste the MATLAB code.
 4. Save it with a `.m` extension.
 5. Click Run.
+
+
+
+
+
 
 # **Experiment 1: Introduction to Network Simulator**
 
@@ -121,14 +108,14 @@ $ns run
 
 ### **Expected output**
 
-[Network Simulator 2 Installation (NS2) — pinguindocs 0.0.1 documentation](https://images.openai.com/static-rsc-4/VT4xmWeqCE71yWVzOGZOXEXJMhfiIwCAEVPHwV_iPGethWu-MN7mu_2T3eyZgF8NEcFiFhj0JL1Ndp3DKsGgdo8RRbQ6VQZEarJ60Or3q-l32DFlLhGjR9Y4s0Fd42fYxmN1-2PskGIDjVijo7bj5LXdB_mvGTVz-RbnvJDboCM?purpose=inline)
-
-[pinguindocs.readthedocs.io](https://pinguindocs.readthedocs.io/en/latest/ns2.html?utm_source=chatgpt.com)
 
 - Two nodes are created.
 - A link is established.
 - Packets travel from node 0 to node 1.
 - NAM displays packet transmission.
+
+
+
 
 # **Experiment 2: Implementation of 2-Node Network**
 
